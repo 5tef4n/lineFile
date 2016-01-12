@@ -224,9 +224,28 @@ def shifting(linedata,x_offset,y_offset,pipette):
 class Gui(QtGui.QMainWindow):
   def __init__(self):
     QtGui.QMainWindow.__init__(self)
+
+    self.setWindowTitle('Sorting and rasterization of linefiles')
 # LABEL with lineEdit for
 # raster: x mult, x inc, y mult, y inc => gray out if not used
 # shift: dx, dy => gray out if not used
+    self.rasterLabel = QtGui.QLabel('Rasterization')
+    self.xMultLabel = QtGui.QLabel('x Multiplicator')
+    self.xMultEdit = QtGui.QLineEdit('1')
+    self.yMultLabel = QtGui.QLabel('y Multiplicator')
+    self.yMultEdit = QtGui.QLineEdit('1')
+    self.xIncLabel = QtGui.QLabel('x Increment(mm)')
+    self.xIncEdit = QtGui.QLineEdit('0')
+    self.yIncLabel = QtGui.QLabel('y Increment(mm)')
+    self.yIncEdit = QtGui.QLineEdit('0')
+
+    self.shiftLabel = QtGui.QLabel('Shifting')
+    self.xShiftLabel = QtGui.QLabel('x Shift(mm)')
+    self.xShiftEdit = QtGui.QLineEdit('0')
+    self.yShiftLabel = QtGui.QLabel('y Shift(mm)')
+    self.yShiftEdit = QtGui.QLineEdit('0')
+
+
 
 # CHECKBOX for
 # sort cartridges
