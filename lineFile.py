@@ -1,4 +1,4 @@
-# python script to optimize switching of cartridges and rasterize output
+# python script to optimize switching of cartridges and rasterize output or shift the scaffold
 #! /usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
@@ -15,15 +15,20 @@ def help_message():
 	print 'Order may be either "xy" or "yx".'
 	print 'Use "[INPUT] 1 0 1 0 xy [OUTPUT]" if only sorting is required.'
 	print 'Note, that files containing multiple scaffolds will be sorted layer by layer not scaffold by scaffold.'
+	print 'Use "[INPUT] [SHIFT X] [SHIFT Y] [PIPETTE] [OUTPUT]" to shift scaffold instead of sorting it.'
+	print 'If pipette is "YES", "y" or "1" only the pipetting lines will be shifted.'
 	sys.exit()
+	
+#need to incorporate shift-scaffold
 
 # import argparse # module for convenient command-line option handling
 # not figured out how to use it yet
 
+shift_scaffold = False
 
-if len(sys.argv) != 8 or sys.argv[1] in ['h', '-h', '-help', '--help']:
+if sys.argv[1] in ['h', '-h', '-help', '--help']:
 	help_message()
-else:
+elif len(sys.argv) == 8:
 	infile = sys.argv[1]
 	outfile = sys.argv[7]
 
@@ -61,7 +66,28 @@ else:
 		rasterization = False
 	else:
 		rasterization = True
+elif len(sys.argv) == 6:
+	shift_scaffold = True
+	infile = sys.argv[1]
+	outfile = sys.argv[5]
+	
+	try:
+		x_shift = float(sys.argv[2])
+	except ValueError:
+		help_message()
 
+	try:
+		y_shift = float(sys.argv[3])
+	except ValueError:
+		help_message()
+	
+	if sys.argv[4] == 'YES' or sys.argv[4] == 'yes' or sys.argv[4] == 'Y' or sys.argv[4] == 'y' or sys.argv[4] = '1':
+		pipette_set = True
+	else:
+		pipette_set = False
+	
+else:
+	help_message()
 
 def read_input(inputfile):
 	#inputdata = inputfile
@@ -194,7 +220,7 @@ def rasterize(linedata):
 
 def shifting(linedata,x_offset,y_offset,pipette):
     ''' Takes a nested list representing a splitted linefile as input.
-        Depending on 'pipette' only lines where the pipette is used are
+        If 'pipette' is true only lines where the pipette is used are
         shifted by 'x_offset' and 'y_offset'. Otherwise the whole scaffold
         is shifted. '''
     newfile = []
@@ -233,12 +259,14 @@ def shifting(linedata,x_offset,y_offset,pipette):
     return newfile
 
 
+
 #main
 
 layerinfo, linefile, old_switch = read_input(infile)
 
 #print old_switch
 #print rasterization
+#print shift_scaffold
 
 if old_switch:
 	sorted_data = sort_layers(layerinfo,linefile)
@@ -257,7 +285,7 @@ if old_switch:
 	else:
 		pass # no optimization, thus do not use sorted data
 
-else: # no sorting, check rasteization
+else: # no sorting, check rasterization
 	if rasterization:
 		print 'No furher optimization of cartridge switches possible.'
 		rasterize(linefile) # invokes write_output(linedata)
@@ -266,7 +294,13 @@ else: # no sorting, check rasteization
 		print 'nor furher optimization of cartridge switches possible.'
 		print 'No output written to ' + outfile
 
-
+if shift_scaffold:
+	shifted_data = shifting(linefile,x_shift,y_shift,pipette_set)
+	if pipette_set:
+		print 'Only pipetting positions shifted.'
+	else:
+		print 'Only scaffold shifted.'
+	write_output(shifted_data)
 
 
 
