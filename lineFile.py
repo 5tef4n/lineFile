@@ -15,15 +15,20 @@ def help_message():
 	print 'Order may be either "xy" or "yx".'
 	print 'Use "[INPUT] 1 0 1 0 xy [OUTPUT]" if only sorting is required.'
 	print 'Note, that files containing multiple scaffolds will be sorted layer by layer not scaffold by scaffold.'
+	print 'Use "[INPUT] [SHIFT X] [SHIFT Y] [PIPETTE] [OUTPUT]" to shift scaffold instead of sorting it.'
+	print 'If pipette is "YES", "y" or "1" only the pipetting lines will be shifted.'
 	sys.exit()
+	
+#need to incorporate shift-scaffold
 
 # import argparse # module for convenient command-line option handling
 # not figured out how to use it yet
 
+shift_scaffold = False
 
-if len(sys.argv) != 8 or sys.argv[1] in ['h', '-h', '-help', '--help']:
+if sys.argv[1] in ['h', '-h', '-help', '--help']:
 	help_message()
-else:
+elif len(sys.argv) == 8:
 	infile = sys.argv[1]
 	outfile = sys.argv[7]
 
@@ -61,7 +66,28 @@ else:
 		rasterization = False
 	else:
 		rasterization = True
+elif len(sys.argv) == 6:
+	shift_scaffold = True
+	infile = sys.argv[1]
+	outfile = sys.argv[5]
+	
+	try:
+		x_shift = float(sys.argv[2])
+	except ValueError:
+		help_message()
 
+	try:
+		y_shift = float(sys.argv[3])
+	except ValueError:
+		help_message()
+	
+	if sys.argv[4] == 'YES' or sys.argv[4] == 'yes' or sys.argv[4] == 'Y' or sys.argv[4] == 'y' or sys.argv[4] = '1':
+		pipette_set = True
+	else:
+		pipette_set = False
+	
+else:
+	help_message()
 
 def read_input(inputfile):
 	#inputdata = inputfile
@@ -192,6 +218,46 @@ def rasterize(linedata):
 	write_output(endfile)
 
 
+def shifting(linedata,x_offset,y_offset,pipette):
+    ''' Takes a nested list representing a splitted linefile as input.
+        If 'pipette' is true only lines where the pipette is used are
+        shifted by 'x_offset' and 'y_offset'. Otherwise the whole scaffold
+        is shifted. '''
+    newfile = []
+    for line in linedata:
+        newline = []
+        if line[0] == '0': # pipette is used
+            if line[1] == '2': # spot point
+                for m in range(len(line)):
+                    if m == 3:
+                        newline.append(repr(round(float(line[m]) + x_offset,2)))
+                    elif m == 4:
+                        newline.append(repr(round(float(line[m]) + y_offset,2)))
+                    else:
+                        newline.append(line[m])
+            elif line[1] == '3': # spot line
+                for m in range(len(line)):
+                    if m==3 or m==5:
+                        newline.append(repr(round(float(line[m]) + x_offset,2)))
+                    elif m==4 or m==6:
+                        newline.append(repr(round(float(line[m]) + y_offset,2)))
+                    else:
+                        newline.append(line[m])
+            else:
+                newline = line # aspiration, thus nothing to do
+        elif line[0] in ['1', '2', '3'] and not pipette:
+            for m in range(len(line)):
+                if m==1 or m==3:
+                    newline.append(repr(round(float(line[m]) + x_offset,2)))
+                elif m==2 or m==4:
+                    newline.append(repr(round(float(line[m]) + y_offset,2)))
+                else:
+                    newline.append(line[m])
+        else:
+            newline = line # plotting line but only pipette should be shifted
+        newfile.append(newline)
+    return newfile
+
 
 #main
 
@@ -217,7 +283,7 @@ if old_switch:
 	else:
 		pass # no optimization, thus do not use sorted data
 
-else: # no sorting, check rasteization
+else: # no sorting, check rasterization
 	if rasterization:
 		print 'No furher optimization of cartridge switches possible.'
 		rasterize(linefile) # invokes write_output(linedata)
@@ -226,7 +292,13 @@ else: # no sorting, check rasteization
 		print 'nor furher optimization of cartridge switches possible.'
 		print 'No output written to ' + outfile
 
-
+if shift_scaffold:
+	shifted_data = shifting(linefile,x_shift,y_shift,pipette_set)
+	if pipette_set:
+		print 'Only pipetting positions shifted.'
+	else:
+		print 'Only scaffold shifted.'
+	write_output(shifted_data)
 
 
 
