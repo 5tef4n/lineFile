@@ -192,6 +192,46 @@ def rasterize(linedata):
 	write_output(endfile)
 
 
+def shifting(linedata,x_offset,y_offset,pipette):
+    ''' Takes a nested list representing a splitted linefile as input.
+        Depending on 'pipette' only lines where the pipette is used are
+        shifted by 'x_offset' and 'y_offset'. Otherwise the whole scaffold
+        is shifted. '''
+    newfile = []
+    for line in linedata:
+        newline = []
+        if line[0] == '0': # pipette is used
+            if line[1] == '2': # spot point
+                for m in range(len(line)):
+                    if m == 3:
+                        newline.append(repr(round(float(line[m]) + x_offset,2)))
+                    elif m == 4:
+                        newline.append(repr(round(float(line[m]) + y_offset,2)))
+                    else:
+                        newline.append(line[m])
+            elif line[1] == '3': # spot line
+                for m in range(len(line)):
+                    if m==3 or m==5:
+                        newline.append(repr(round(float(line[m]) + x_offset,2)))
+                    elif m==4 or m==6:
+                        newline.append(repr(round(float(line[m]) + y_offset,2)))
+                    else:
+                        newline.append(line[m])
+            else:
+                newline = line # aspiration, thus nothing to do
+        elif line[0] in ['1', '2', '3'] and not pipette:
+            for m in range(len(line)):
+                if m==1 or m==3:
+                    newline.append(repr(round(float(line[m]) + x_offset,2)))
+                elif m==2 or m==4:
+                    newline.append(repr(round(float(line[m]) + y_offset,2)))
+                else:
+                    newline.append(line[m])
+        else:
+            newline = line # plotting line but only pipette should be shifted
+        newfile.append(newline)
+    return newfile
+
 
 #main
 
