@@ -1,0 +1,21 @@
+The project aims on providing simple means for manipulating so called 'linefiles'.
+The ladder are used for the GeSiM BioScaffolder 2.1 to tell the 3D-printer how the printed object should look like.
+Note that both, older and newer versions of the BioScaffolder, use different file formats not compatible with the one of the BioScaffolder 2.1 and at the state of writing not compatible with any of the programs within in this repository.
+
+
+lineFile.py is a command line tool and should work, incorporating methods for lateral shifting and rasterization of the printer output.
+Shifting may inlcude either the whole output or the pipetted parts only, which is meant for fine adjustment of the pipetting.
+Rasterization simply mulitplies the output to print several objects on one run.
+Calling without parameters or with -h | --help should print the appropriate command line options.
+
+
+linFileQt.py tries to present the same functionality as lineFile.py with a GUI using Qt4.
+
+
+This software was started when doing my diploma thesis and continued in my spare time to improve my coding capabilities.
+Don't expect miracles. Especially:
+
+This software comes with NO WARRANTY whatsoever.
+
+
+Find GeSiM at: http://gesim-bioinstruments-microfluidics.com
