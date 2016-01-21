@@ -226,6 +226,7 @@ class Gui(QtGui.QMainWindow):
     QtGui.QMainWindow.__init__(self)
 
     self.setWindowTitle('Sorting and rasterization of linefiles')
+# gray-out items with .setEnabled(bool)
 # LABEL with lineEdit for
 # raster: x mult, x inc, y mult, y inc => gray out if not used
 # shift: dx, dy => gray out if not used
@@ -251,8 +252,19 @@ class Gui(QtGui.QMainWindow):
 # sort cartridges
 # rasterize : order - radiobutton?
 # shift : pipette only - radiobutton? => gray out sorting and raster if pipette shifted
+    self.sortBox = QtGui.QCheckBox('Sort Cartridges')
+    self.rasterBox = QtGui.QCheckBox('Add Scaffolds')
+    self.shiftBox = QtGui.QCheckBox('Shift Scaffold/Pipette')
 
-#radiobutton?
+    self.pipetteRadio = QtGui.QButtonGroup()
+    self.isPipetteRadio = QtGui.QRadioButton('Shift only Pipette Positions')
+    self.noPipetteRadio = QtGui.QRadioButton('Shift whole Scaffold')
+    self.noPipetteRadio.setChecked(True)
+    self.pipetteRadio.addButton(self.isPipetteRadio)
+    self.pipetteRadio.addButton(self.noPipetteRadio)
+
+
+#    self.shiftBox.isChecked()
 
 # file selection for [line edit + button]
 # input
